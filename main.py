@@ -11,11 +11,12 @@ pd.read_sql("""SELECT * FROM sqlite_master""", conn)
 
 # STEP 1=first,last name and job title of employees working in Boston.
 df_boston = pd.read_sql("""
-    SELECT e.firstName, e.lastName, e.jobTitle
+    SELECT (e.firstName || ' ' || e.lastName) AS name, e.jobTitle
     FROM employees e
     INNER JOIN offices o ON e.officeCode = o.officeCode
     WHERE o.city = 'Boston';
 """, conn)
+
 # STEP 2
 df_zero_emp = pd.read_sql("""
     SELECT o.officeCode, o.city
@@ -89,19 +90,23 @@ df_customers = pd.read_sql("""
 
 # STEP 10
 df_under_20 = pd.read_sql("""
-    WITH UnderperformingProducts AS (
-        SELECT od.productCode
-        FROM orderdetails od
-        INNER JOIN orders o ON od.orderNumber = o.orderNumber
-        GROUP BY od.productCode
-        HAVING COUNT(DISTINCT o.customerNumber) < 20
-    )
-    SELECT DISTINCT e.employeeNumber, e.firstName, e.lastName, off.city, off.officeCode
+    SELECT DISTINCT 
+        e.employeeNumber, 
+        e.firstName, 
+        e.lastName, 
+        off.city, 
+        off.officeCode
     FROM employees e
     INNER JOIN offices off ON e.officeCode = off.officeCode
     INNER JOIN customers c ON e.employeeNumber = c.salesRepEmployeeNumber
     INNER JOIN orders o ON c.customerNumber = o.customerNumber
     INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
-    WHERE od.productCode IN (SELECT productCode FROM UnderperformingProducts);
+    WHERE od.productCode IN (
+        SELECT od2.productCode
+        FROM orderdetails od2
+        INNER JOIN orders o2 ON od2.orderNumber = o2.orderNumber
+        GROUP BY od2.productCode
+        HAVING COUNT(DISTINCT o2.customerNumber) < 20
+    );
 """, conn)
 conn.close()

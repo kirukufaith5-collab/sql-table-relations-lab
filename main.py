@@ -88,7 +88,7 @@ df_customers = pd.read_sql("""
     GROUP BY o.officeCode, o.city;
 """, conn)
 
-# STEP 10
+
 # STEP 10
 df_under_20 = pd.read_sql("""
     SELECT DISTINCT 
@@ -103,11 +103,11 @@ df_under_20 = pd.read_sql("""
     INNER JOIN orders o ON c.customerNumber = o.customerNumber
     INNER JOIN orderdetails od ON o.orderNumber = od.orderNumber
     WHERE od.productCode IN (
-        SELECT od2.productCode
-        FROM orderdetails od2
-        INNER JOIN orders o2 ON od2.orderNumber = o2.orderNumber
-        GROUP BY od2.productCode
-        HAVING COUNT(DISTINCT o2.customerNumber) < 20
+        SELECT sub_od.productCode
+        FROM orderdetails sub_od
+        INNER JOIN orders sub_o ON sub_od.orderNumber = sub_o.orderNumber
+        GROUP BY sub_od.productCode
+        HAVING COUNT(DISTINCT sub_o.customerNumber) < 20
     );
 """, conn)
 conn.close()

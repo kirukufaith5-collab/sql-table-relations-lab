@@ -11,7 +11,7 @@ pd.read_sql("""SELECT * FROM sqlite_master""", conn)
 
 # STEP 1=first,last name and job title of employees working in Boston.
 df_boston = pd.read_sql("""
-    SELECT (e.firstName || ' ' || e.lastName) AS name, e.jobTitle
+    SELECT e.firstName, e.lastName
     FROM employees e
     INNER JOIN offices o ON e.officeCode = o.officeCode
     WHERE o.city = 'Boston';
@@ -88,6 +88,7 @@ df_customers = pd.read_sql("""
     GROUP BY o.officeCode, o.city;
 """, conn)
 
+# STEP 10
 # STEP 10
 df_under_20 = pd.read_sql("""
     SELECT DISTINCT 
